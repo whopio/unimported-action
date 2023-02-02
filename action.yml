@@ -1,0 +1,14 @@
+name: 'Unimported files action'
+description: 'detect unimported files in the repo using `npx unimported` and comment the results on PRs'
+author: 'whop team'
+runs:
+  using: 'node16'
+  main: 'packages/unimporeted-action/out/index.js'
+inputs:
+  token:
+    description: Github Access Token
+    required: true
+  projects:
+    description: "The directories to run the unimported script in"
+    required: false
+    default: "./"
