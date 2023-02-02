@@ -17,43 +17,30 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - name: Check package.json for version increase
-        id: check
-        uses: whopio/turbo-module@v0.0.3-canary.0
-        with: 
-          action: check
-          token: ${{ github.token }}
-      - uses: actions/checkout@v3
-        if: steps.check.outputs.can-publish == 'true'
-      - uses: pnpm/action-setup@v2
+      - uses: actions/github-script@v6
+        id: get-version
         with:
-          version: 7.13.6
-        if: steps.check.outputs.can-publish == 'true'
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          check-latest: true
-          cache: pnpm
-        if: steps.check.outputs.can-publish == 'true'
-      - name: Install all packages
-        run: pnpm i
-        if: steps.check.outputs.can-publish == 'true'
-      - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
-        if: steps.check.outputs.can-publish == 'true'
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Run turbo release flow
-        run: pnpm turbo release ${{ steps.check.outputs.filter }}
-        if: steps.check.outputs.can-publish == 'true'
+          script: |
+            // Get the current package.json version
+            const { data: content } = await github.rest.repos.getContent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: 'package.json'
+            });
+            if ('content' in content) {
+              return JSON.parse(
+                Buffer.from(content.content, 'base64').toString(),
+              ).version,
+            }
+            throw new Error('Could not load main package.json');
       - name: Github Release
         id: release
         uses: whopio/turbo-module@v0.0.3-canary.0
+        if: ${{ !startsWith(steps.get-version.outputs.result, '"0.0.0') }}
         with: 
           action: release
           token: ${{ github.token }}
-          version: ${{ steps.check.outputs.version }}
-        if: steps.check.outputs.can-publish == 'true'
+          version: ${{ steps.get-version.outputs.result }}
       - name: Sync auto-release PRs
         uses: whopio/turbo-module@v0.0.3-canary.0
         with: 
