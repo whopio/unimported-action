@@ -20,7 +20,7 @@ jobs:
             if ('content' in content) {
               return JSON.parse(
                 Buffer.from(content.content, 'base64').toString(),
-              ).version,
+              ).version;
             }
             throw new Error('Could not load main package.json');
       - name: Get result
