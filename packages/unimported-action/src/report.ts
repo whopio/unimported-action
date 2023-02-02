@@ -3,15 +3,22 @@ import { join } from 'path';
 import { promisify } from 'util';
 const exec = promisify(_exec);
 
+function isExecError(e: unknown): e is { stdout?: string; stderr?: string } {
+  return (
+    'stderr' in (e as { stdout?: string; stderr?: string }) &&
+    'stdout' in (e as { stdout?: string; stderr?: string })
+  );
+}
+
 const runUnimported = async (dir: string) => {
   try {
     await exec(`npx unimported`, { cwd: join(process.cwd(), dir) });
     return {
       success: true,
     };
-  } catch (e: any) {
+  } catch (e: unknown) {
     if (!e) throw e;
-    if ('stderr' in e && 'stdout' in e)
+    if (isExecError(e))
       return {
         success: false,
         stderr: e.stderr,
