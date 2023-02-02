@@ -3,7 +3,7 @@ description: 'detect unimported files in the repo using `npx unimported` and com
 author: 'whop team'
 runs:
   using: 'node16'
-  main: 'packages/unimporeted-action/out/index.js'
+  main: 'packages/unimported-action/out/index.js'
 inputs:
   token:
     description: Github Access Token
