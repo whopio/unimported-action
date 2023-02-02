@@ -40,7 +40,7 @@ jobs:
         with: 
           action: release
           token: ${{ github.token }}
-          version: ${{ steps.get-version.outputs.result }}
+          version: ${{ fromJSON(steps.get-version.outputs.result) }}
       - name: Sync auto-release PRs
         uses: whopio/turbo-module@v0.0.3-canary.0
         with: 
