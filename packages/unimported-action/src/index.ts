@@ -31,13 +31,18 @@ async function run() {
     if (!issue_number) return;
 
     const GITHUB_TOKEN = core.getInput('token', { required: true });
+    const UNIMPORTED_VERSION = core.getInput('unimported-version', {
+      required: true,
+    });
+
+    console.info(`Using version: ${UNIMPORTED_VERSION}`);
 
     const octo = github.getOctokit(GITHUB_TOKEN);
     const issueCommon = { ...repo, issue_number: issue_number };
 
     const commentIdPromise = findComment(octo, issueCommon);
     const dirs = core.getInput('projects').split(',');
-    const reportPromise = getReport(dirs);
+    const reportPromise = getReport(dirs, UNIMPORTED_VERSION);
 
     let commentId = await commentIdPromise;
     const idleReport = getIdleReport(dirs);

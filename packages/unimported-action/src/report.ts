@@ -10,9 +10,9 @@ function isExecError(e: unknown): e is { stdout?: string; stderr?: string } {
   );
 }
 
-const runUnimported = async (dir: string) => {
+const runUnimported = async (dir: string, version: string) => {
   try {
-    await exec(`npx unimported`, { cwd: join(process.cwd(), dir) });
+    await exec(`npx unimported@${version}`, { cwd: join(process.cwd(), dir) });
     return {
       success: true,
     };
@@ -142,11 +142,11 @@ ${inputs
   .join('\n')}
 `.trim();
 
-export const getReport = async (check: string[]) => {
+export const getReport = async (check: string[], version: string) => {
   let err = 0;
   const reports = await Promise.all(
     check.map(async (dir) => {
-      const { stdout } = await runUnimported(dir);
+      const { stdout } = await runUnimported(dir, version);
       if (stdout) {
         err++;
         const errorData = parseError(stdout);
