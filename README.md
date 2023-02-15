@@ -1,18 +1,36 @@
-# turbo-module starter
+# whopio/unimported-action
 
-this is a starter template generated from `create-turbo-module`
+GitHub Action powered by [smeijer/unimported](https://github.com/smeijer/unimported). Runs `npx unimported` in all specified projects and comments a report on related PRs.
 
-## Additional setup:
+Ensures that all files in a project are either entry-points or imported by entry-points. Also ensures that all imported packages are installed included in the `package.json` and that all `dependencies` are used.
 
-- Only allow squash merging PRs and set the default message to `Pull request title and description`
-- install kodiakhq
-- set up branch protection for the `main` branch, i.E.:
-  - require a pull request before merging
-    - require approvals: 1+
-    - require review from code owners
-  - require conversation resolution before merging
-  - restrict who can push to matching branches
-    - resitrct pushes that create matching branches
-    - allow kodiakhq to push to matching branches
-- allow actions to create PRs (/settings/actions). This has to be allowed on the repo and org level
-- add your `NPM_TOKEN` to your workflow secrets
+## Action setup
+
+```yml
+on:
+  pull_request:
+    types:
+      - synchronize
+      - opened
+
+name: Unimported
+
+concurrency:
+  group: pr-action-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  unimported:
+    name: Check unimported
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: whopio/unimported-action@v0.0.1
+        with:
+          token: ${{ github.token }}
+          projects: 'path/to/project,path/to/different/project'
+```
+
+## Configuration
+
+Each project the action runs in can provide its own [`.uniportedrc.json`](https://github.com/smeijer/unimported#example-config-file) configuration file.
